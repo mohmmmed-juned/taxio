@@ -1,6 +1,7 @@
 import mysql from "mysql";
+import config from "../config/config.js";
 
-const pool = mysql.createPool();
+const pool = mysql.createPool({ ...config, acquireTimeout: 6000000 });
 
 export const createTable = (schema) => {
   return new Promise((resove, reject) => {

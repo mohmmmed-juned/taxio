@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-import userSchema from "./usersSchema";
+import userSchema from "./usersSchema.js";
 import bcrypt from "bcryptjs";
 import {
   checkRecordExists,
@@ -8,8 +8,8 @@ import {
   insertRecord,
 } from "../sql/sqlFunctions.js";
 
-const generateAccessToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+const generateAccessToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 export const register = async (req, res) => {
@@ -23,7 +23,7 @@ export const register = async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const user = {
-    userId: uuidv4(),
+    id: uuidv4(),
     email,
     password: hashedPassword,
   };
@@ -66,9 +66,9 @@ export const login = async (req, res) => {
 
       if (passwordMatch) {
         res.status(200).json({
-          userId: existingUser.userId,
+          id: existingUser.id,
           email: existingUser.email,
-          access_token: generateAccessToken(existingUser.userId),
+          access_token: generateAccessToken(existingUser.id),
         });
       } else {
         res.status(401).json({ error: "Invalid credentials" });
