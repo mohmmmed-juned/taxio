@@ -2,6 +2,7 @@ import mysql from "mysql";
 import config from "./config.js";
 
 const connectDB = async () => {
+
   const pool = mysql.createPool({ ...config, acquireTimeout: 6000000 });
 
   pool.getConnection((err, connection) => {

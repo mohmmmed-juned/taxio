@@ -3,6 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./users/userRoutes.js";
+import driverRoute from "./driver/driverRoute.js";
 
 const port = process.env.PORT;
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/", userRoutes);
+app.use("/", driverRoute);
 
 connectDB();
 
