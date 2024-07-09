@@ -16,27 +16,34 @@ const generateAccessToken = (id) => {
 };
 
 export const send_otp = async (req, res) => {
-  const { phone } = req.body;
-  if (!phone) {
-    res.status(400).json({ error: "Phone number fields cannot be empty!" });
+  const { country_code, phone } = req.body;
+  if (!country_code || !phone) {
+    res.status(400).json({ error: "Country code & Phone number fields cannot be empty!" });
     return;
   }
   //   const salt = await bcrypt.genSalt(10);
   //   const hashedPassword = await bcrypt.hash(password, salt);
   const otp = {
     id: uuidv4(),
+    country_code,
     phone,
     otp: "1234", // Generate OTP
   };
   try {
     await createTable(otpsSchema);
-    const conditions = [phone];
-    await checkRecordExists("otp_verifications", ["phone"], conditions);
+    const conditions = [country_code, phone];
+    const checkMobileNo = await checkRecordExists("users", ["country_code", "phone"], conditions);
 
-    await insertRecord("otp_verifications", otp);
-    res
-      .status(201)
-      .json({ data: { id: otp.id }, message: "Otp send Successfullly" });
+    if (!checkMobileNo) {
+      await insertRecord("otp_verifications", otp);
+      res
+        .status(201)
+        .json({ data: { id: otp.id }, message: "Otp send successfully" });
+    }
+    else {
+      res.status(400).json({ error: "Mobile number is already exist!" });
+      return;
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -45,9 +52,9 @@ export const send_otp = async (req, res) => {
 // -----
 
 export const otp_verify = async (req, res) => {
-  const { phone, otp, id } = req.body;
+  const { country_code, phone, otp, id } = req.body;
 
-  if (!phone || !otp) {
+  if ((!country_code && !phone) || !otp) {
     res
       .status(400)
       .json({ error: "Phone number or OTP fields cannot be empty!" });
@@ -56,18 +63,18 @@ export const otp_verify = async (req, res) => {
 
   try {
     await createTable(userSchema);
-    const conditions = [id, phone, otp];
+    const conditions = [id, country_code, phone, otp];
     const existingUser = await checkRecordExists(
       "otp_verifications",
-      ["id", "phone", "otp"],
+      ["id", "country_code", "phone", "otp"],
       conditions
     );
     var token = "";
     if (existingUser) {
-      const conditions = [phone];
+      const conditions = [country_code, phone];
       const userAlreadyExists = await checkRecordExists(
         "users",
-        ["phone"],
+        ["country_code", "phone"],
         conditions
       );
       if (userAlreadyExists) {
@@ -76,6 +83,7 @@ export const otp_verify = async (req, res) => {
       } else {
         const user = {
           id: uuidv4(),
+          country_code,
           phone,
         };
 
@@ -86,7 +94,7 @@ export const otp_verify = async (req, res) => {
 
       res.status(201).json({
         data: { user_token: token },
-        message: "OTP Verified Successfully",
+        message: "OTP verified successfully",
       });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
@@ -131,7 +139,7 @@ export const otp_verify = async (req, res) => {
 
 
 export const personal_info = async (req, res) => {
-  const { name, email, gender, phone } = req.body; // Ensure phone is included in the destructuring
+  const { name, email, gender, country_code, phone } = req.body; // Ensure phone is included in the destructuring
 
   console.log("req.files :>> ", req.files);
 
@@ -142,15 +150,18 @@ export const personal_info = async (req, res) => {
   // }
 
   try {
-    const conditions = [phone];
-    const userAlreadyExists = await checkRecordExists("users", ["phone"], conditions);
+    const conditions = [country_code, phone];
+    const userAlreadyExists = await checkRecordExists("users", ["country_code", "phone"], conditions);
 
+    const user_type = 2; //1: User, 2: Driver
     const userId = uuidv4();
     const user = {
       name,
       email,
       gender,
-      phone
+      country_code,
+      phone,
+      user_type
     };
 
     if (req.files && req.files.length > 0) {
@@ -159,7 +170,8 @@ export const personal_info = async (req, res) => {
     }
 
     if (userAlreadyExists) {
-      await updateRecord("users", user, "phone = ?", [phone]);
+      await updateRecord("users", user, "phone = ? AND country_code = ?", [phone, country_code]);
+
     } else {
       user.id = userId;
       await insertRecord("users", user);
@@ -167,7 +179,7 @@ export const personal_info = async (req, res) => {
 
     res.status(201).json({
       data: { user_id: userAlreadyExists ? userAlreadyExists.id : userId },
-      message: "User information  saved successfully",
+      message: "Driver information saved successfully",
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

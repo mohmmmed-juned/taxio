@@ -4,6 +4,7 @@ import { send_otp_user, otp_verify_user, personal_info_user } from "./authContro
 import { vehicle_list } from "./vehicleController.js";
 import { promocode_list } from "./promocodeController.js";
 import { calculateDistance } from "./distanceController.js";
+import { createBooking, myBookingList } from "./bookingController.js";
 import uploadMiddleware from "../middlewares/multer.js";
 
 const router = express.Router();
@@ -17,8 +18,15 @@ router.post(
     uploadMiddleware,
     personal_info_user
 );
+router.post(
+    "/create-booking",
+    authenticateToken,
+    uploadMiddleware,
+    createBooking
+);
 router.get("/vehicle-list", vehicle_list);
 router.get("/promocode-list", promocode_list);
+router.get("/my-bookings", myBookingList);
 router.get("/cal-distance", calculateDistance);
 
 // Added prefix

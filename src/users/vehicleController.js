@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import {
-    getVehicle
+    getList
 } from "../sql/sqlFunctions.js";
 
 const generateAccessToken = (id) => {
@@ -11,7 +11,7 @@ const generateAccessToken = (id) => {
 
 export const vehicle_list = async (req, res) => {
     try {
-        const vehicle_list = await getVehicle("vehiclelists");
+        const vehicle_list = await getList("vehiclelists");
 
         return res.status(200).json({
             message: "Vehicle list.",

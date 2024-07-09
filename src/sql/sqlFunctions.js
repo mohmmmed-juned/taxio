@@ -75,7 +75,7 @@ export const updateRecord = (tableName, record, whereClause, whereValues) => {
   });
 };
 
-export const getVehicle = (tableName) => {
+export const getList = (tableName) => {
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM ${tableName}`;
   
@@ -89,9 +89,9 @@ export const getVehicle = (tableName) => {
   });
 };
 
-export const getPromoCodes = (tableName) => {
+export const getListWithCondition = (tableName, whereValues) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM ${tableName}`;
+    const query = `SELECT * FROM ${tableName} WHERE user_id = "${whereValues}"`;
   
     pool.query(query, (err, results) => {
       if (err) {

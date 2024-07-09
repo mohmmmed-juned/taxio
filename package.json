@@ -2,7 +2,7 @@
   "name": "taxio",
   "version": "1.0.0",
   "description": "taxi app",
-  "main": "app.js",
+  "main": "src/app.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/app",

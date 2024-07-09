@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import {
-    getPromoCodes
+    getList
 } from "../sql/sqlFunctions.js";
 
 const generateAccessToken = (id) => {
@@ -11,7 +11,7 @@ const generateAccessToken = (id) => {
 
 export const promocode_list = async (req, res) => {
     try {
-        const promocode_list = await getPromoCodes("promocodes");
+        const promocode_list = await getList("promocodes");
 
         return res.status(200).json({
             message: "Promocode list.",
